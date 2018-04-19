@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport"
+        content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+
+
+  <style>
+    body {
+      min-width: 250px;
+      min-height: 200px;
+    }
+
+
+    .badge {
+      display: inline-block;
+      padding: .25em .4em;
+      font-size: 75%;
+      font-weight: 700;
+      line-height: 1;
+      color: #fff;
+      text-align: center;
+      white-space: nowrap;
+      vertical-align: baseline;
+      border-radius: .25rem;
+    }
+
+
+
+    .badge.running {
+      background-color: green;
+      display: none;
+    }
+
+    .badge.stop {
+      background: red;
+    }
+
+    .running .badge.running {
+      display: inline-block;
+    }
+
+    .running .badge.stop {
+      display: none;
+    }
+
+    button.stop {
+      display: none;
+    }
+
+
+    .running button.launch {
+      display: none;
+    }
+
+    .running button.stop {
+      display: block;
+    }
+
+
+    button {
+      background-color: #007bff;
+      display: block;
+      color: #fff;
+      padding: 5px;
+      text-align: center;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      width: 100%;
+    }
+
+    section {
+      margin-bottom: 25px;
+    }
+
+  </style>
+  <script src="js/vendor.js"></script>
+
+</head>
+<body>
+<section class="section" running="false" id="facebook">
+  <p>
+    Scrapping Facebook
+    <span class="badge running">Running</span>
+    <span class="badge stop">Stopped</span>
+  </p>
+  <button>Lancer</button>
+</section>
+<section class="section" running="false" id="linkedin">
+  <p>
+    Scrapping Linkedin
+    <span class="badge running">Running</span>
+    <span class="badge stop">Stopped</span>
+  </p>
+  <p>
+    <button>Lancer</button>
+  </p>
+  <a href="https://www.linkedin.com/?download=true" target="_blank">Télécharger les données LinkedIn</a>
+</section>
+
+<section class="section" running="false" id="google">
+  <p>
+    Scrapping Google
+    <span class="badge running">Running</span>
+    <span class="badge stop">Stopped</span>
+  </p>
+
+  <button class="launch">Launch</button>
+  <button class="stop">Stop scrapping</button>
+</section>
+
+<script src="libs/jquery-3.3.1.min.js"></script>
+<script src="js/popup.js"></script>
+</body>
+</html>
