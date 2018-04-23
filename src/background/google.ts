@@ -19,8 +19,6 @@ export class BGoogle extends Process
 
         super();
 
-        this.setActiveTab();
-
         this.is_running = false;
 
     }
@@ -59,10 +57,11 @@ export class BGoogle extends Process
 
         let $this = this;
 
-        console.log(data);
-
         this.options = data;
 
+        if(this._is_running) {
+            this.reloadTab();
+        }
 
         setTimeout(function(){
             $this.is_running = true;
@@ -97,6 +96,12 @@ export class BGoogle extends Process
     }
 
 
+    get is_running() : boolean
+    {
+        return this._is_running;
+    }
+
+
 
     /**
      *
@@ -104,33 +109,24 @@ export class BGoogle extends Process
      */
     public handleEvents($event : any) : void
     {
-
-        console.log('EVENT',$event);
-
         switch ($event.type) {
             case 'pop-up-open' :
                 this.handlePopUp($event);
                 break;
-            case 'linkedin-load' : {
-                this.onLoad($event);
-                break;
-            }
             case 'pop-up-google-button-click' :
                 this.onToggle($event);
                 break;
             case 'google-start' :
                 this.start($event);
                 break;
-            case 'google-captcha' :
-                this.captcha();
-                break;
             case 'google-load' :
-                console.log('google load');
                 this.onLoad($event);
                 break;
-                case 'google-stop' :
-                console.log('google load');
+            case 'google-stop' :
                 this.onStop($event);
+                break;
+            case 'notification' :
+                this.sendNotificationFromEvent($event);
                 break;
         }
 
@@ -174,9 +170,6 @@ export class BGoogle extends Process
     {
 
         let $this = this;
-
-        console.log('is running !',this.options);
-
 
         setTimeout(function () {
 

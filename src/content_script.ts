@@ -1,10 +1,12 @@
 import {CLinkedin} from './content/linkedin';
 import {CGoogle} from "./content/google";
 import {GoogleScrapper} from "./content/google.scrapper";
+import {CFacebook} from "./content/facebook";
 
 
 let $linkedin = new CLinkedin();
 let $google = new GoogleScrapper();
+let $facebook = new CFacebook();
 
 // Set extension is activated
 document.getElementsByTagName('body')[0].setAttribute('extension-installed', 'true');
@@ -27,6 +29,9 @@ chrome.runtime.onMessage.addListener(function($data, sender, sendResponse) {
             break;
         case 'google-running' :
             $google.launch($data.data);
+            break;
+        case 'facebook-running' :
+            $facebook.launch($data.data);
             break;
     }
 

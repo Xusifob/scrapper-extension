@@ -41,20 +41,7 @@ export abstract class CGoogle extends ContentProcess
     }
 
 
-    /**
-     *
-     * Add script to the page
-     *
-     */
-    public launch($data) : void
-    {
 
-        this.is_running = $data.running;
-
-        this.run();
-
-
-    }
 
 
     protected load() : void

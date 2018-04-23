@@ -1,4 +1,5 @@
 import {Process} from './Process';
+import QueryInfo = chrome.tabs.QueryInfo;
 
 
 /**
@@ -117,22 +118,31 @@ export class BLinkedin extends Process
 
     /**
      *
-     * Set the ID of the tab to open to avoid opening multiple tabs all the time
-     *
+     * @param {boolean} $doNotOpen
+     * @param {function} callback
      */
-    public setActiveTab()
+    public setActiveTab($doNotOpen : boolean = false,callback = null)
     {
 
         let $this = this;
 
-        chrome.tabs.query({currentWindow: true, active : true},function(tabArray){
-                if(tabArray[0]) {
-                    $this._active_tab = tabArray[0].id;
+        console.log('setting active tab',$this);
+
+        chrome.tabs.query({url : ['https://*.linkedin.com/search/*','https://*.linkedin.com/in/*']},function(tabArray){
+
+            if(tabArray[0]) {
+                $this._active_tab = tabArray[0].id;
+
+                console.log('linkedin',tabArray[0]);
+
+                if(typeof callback === 'function') {
+                    callback();
                 }
             }
-        );
-
+        });
     }
+
+
 
 
 

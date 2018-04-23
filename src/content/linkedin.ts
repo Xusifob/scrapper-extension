@@ -1,4 +1,5 @@
 import {ContentProcess} from "./content-process";
+import {Scrapper} from "./scrapper";
 
 
 /**
@@ -56,10 +57,17 @@ export class CLinkedin extends ContentProcess
             this.users = [];
         }
 
+        if(this.users.length > 99) {
+            $('body').append('<div style="position: fixed;bottom: 0;left:0;color:#fff;background-color: red;padding: 15px;border: none;z-index: 999;left: 0;right: 0;width: 100%;display: block;font-size: 14px;text-align: center;">You\'ve visited a lot of profiles, let it cool down to avoid being flagged</div>');
+            return;
+        }
+
 
         if(!this.isLinkedin()) {
             return;
         }
+
+        console.log('Is linkedin passed');
 
 
         $(document).ready(function () {
@@ -67,8 +75,7 @@ export class CLinkedin extends ContentProcess
         });
 
         this.handleDownload();
-
-        this.eventListener();
+        this.handleReset();
 
     }
 
@@ -83,7 +90,22 @@ export class CLinkedin extends ContentProcess
     }
 
 
+    /**
+     * Handle reset of all linkedIn data
+     */
+    private handleReset() : void {
 
+
+        if(document.location.href.match(/download=true/)) {
+            localStorage.removeItem('xus-users');
+            localStorage.removeItem('xus-profiles_url');
+        }
+    }
+
+
+    /**
+     * Handle download of all linkedIn data
+     */
     private handleDownload() : void {
 
 
@@ -100,12 +122,16 @@ export class CLinkedin extends ContentProcess
      */
     public finish() : void
     {
+        this.is_running = false;
+
         let csv = this.createCSV(this.users);
 
         let pom = document.createElement('a');
         pom.setAttribute('href', 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv));
         pom.setAttribute('download', 'leads.csv');
         pom.click();
+
+        this.sendMessage('pop-up-linkedin-button-click',{running : this.is_running})
 
         document.write('Your leads are being extracted');
         //document.write(csv);
@@ -119,15 +145,6 @@ export class CLinkedin extends ContentProcess
     {
         this.sendMessage('linkedin-load');
     }
-
-
-    private eventListener() : void
-    {
-
-
-
-    }
-
 
 
 
@@ -178,15 +195,14 @@ export class CLinkedin extends ContentProcess
 
         localStorage.setItem('xus-profiles_url',JSON.stringify(this.urls));
 
-        if($_page > this.max_page) {
-
+        if($_page > this.max_page || $('.next-text').length == 0 || this.urls.length > 99) {
             $this.next();
         }else{
             $('html, body').animate({scrollTop:99999},1);
             $('.next-text').click();
             setTimeout(function () {
                 $this.run();
-            },2500)
+            },4000)
         }
     }
 
@@ -205,19 +221,19 @@ export class CLinkedin extends ContentProcess
         $('html, body').animate({scrollTop:99999},1);
 
         setTimeout(function () {
-            $user.name = CLinkedin.trim($('.pv-top-card-section__name').text());
-            $user.company = CLinkedin.trim($('.pv-top-card-section__company').text());
-            $user.university = CLinkedin.trim($('.pv-top-card-section__school').text());
-            $user.location = CLinkedin.trim($('.pv-top-card-section__location').text());
-            $user.position = CLinkedin.trim($('.experience-section').find('li:first-child').find('h3').text());
-            $user.languages = CLinkedin.trim($('.languages').find('.pv-accomplishments-block__summary-list').text());;
+            $user.name = Scrapper.trim($('.pv-top-card-section__name').text());
+            $user.company = Scrapper.trim($('.pv-top-card-section__company').text());
+            $user.university = Scrapper.trim($('.pv-top-card-section__school').text());
+            $user.location = Scrapper.trim($('.pv-top-card-section__location').text());
+            $user.position = Scrapper.trim($('.experience-section').find('li:first-child').find('h3').text());
+            $user.languages = Scrapper.trim($('.languages').find('.pv-accomplishments-block__summary-list').text());;
             $user.profile = document.location.href;
 
             let $universities = '';
 
             $('.education-section').find('.pv-entity__school-name').each(function(){
 
-                $universities += CLinkedin.trim($(this).text()) + ', ';
+                $universities += Scrapper.trim($(this).text()) + ', ';
             });
 
             $user.universities = $universities;
@@ -231,7 +247,7 @@ export class CLinkedin extends ContentProcess
 
             $this.next();
 
-        },4000);
+        },8000);
     }
 
 
@@ -255,7 +271,7 @@ export class CLinkedin extends ContentProcess
 
         if(!$url) {
             console.log('finish');
-            document.write(JSON.stringify(this.users));
+            this.finish();
             return;
         }
 
@@ -269,17 +285,16 @@ export class CLinkedin extends ContentProcess
         localStorage.setItem('xus-profiles_url',JSON.stringify(this.urls));
 
 
-        document.location.href = $url + '?scraping=true';
+
+        // Add a timeout in order to reduce the possibility to be flagged
+        setTimeout(function () {
+            document.location.href = $url;
+        },2000);
 
 
 
     }
 
-
-    static trim($string) {
-
-        return $string.replace(/(\r\n\t|\n|\r\t)/g,'').trim();
-    }
 
 
 }

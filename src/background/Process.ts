@@ -79,7 +79,6 @@ export abstract class Process
         }, function(response) {
             console.log('SENT DATA',$data);
 
-
         });
     }
 
@@ -95,15 +94,9 @@ export abstract class Process
 
         console.log('Send EVENT',$event,$data);
 
-
         this.setActiveTab(false,function() {
 
-            if(!$this._active_tab) {
-                $this.sendMessageToContent($event,$data);
-                return;
-            }
-
-             console.log('SENDING',$event,$data);
+           console.log('SENDING',$event,$data);
 
             chrome.tabs.sendMessage($this._active_tab, {
                 event: $event,
@@ -130,6 +123,9 @@ export abstract class Process
         console.log('setting active tab');
 
 
+        // Use a random timeout to avoid multiple opens
+        setTimeout(function () {
+
         chrome.windows.getAll({populate:true},function(windows){
             windows.forEach(function(window){
                 window.tabs.forEach(function(tab){
@@ -148,6 +144,18 @@ export abstract class Process
 
         });
 
+        },Math.random()*500);
+    }
+
+
+
+
+    public reloadTab() {
+        let $this = this;
+
+        this.setActiveTab(false,function () {
+            chrome.tabs.reload($this.active_tab);
+        })
     }
 
 
@@ -188,18 +196,48 @@ export abstract class Process
     }
 
 
-
-    public sendNotification($title : string,$message : string) : void
+    /**
+     *
+     * Send a notification
+     *
+     * @param {string} $title
+     * @param {string} $message
+     * @param {string | number} $url
+     */
+    public sendNotification($title : string,$message : string,$url : string|number = '') : void
     {
-        let opt = {
+        let opt : any = {
             type : "basic",
             title : $title,
             message : $message,
             iconUrl : '/icon.png'
         };
 
-        let $notification = chrome.notifications.create('xus-ext',opt);
 
+        console.log($url);
+
+
+        chrome.notifications.create('xus-ext',opt,function ($id) {
+
+            chrome.notifications.onClicked.addListener(function ($_id) {
+                console.log($url);
+
+                if($id == $_id && $url) {
+                    if(typeof $url === "string") {
+                        chrome.tabs.create({ url: $url});
+                    }
+                }
+
+            })
+        });
+
+    }
+
+
+
+    public sendNotificationFromEvent($event : any) : void
+    {
+        this.sendNotification($event.options.title,$event.options.body);
     }
 
 

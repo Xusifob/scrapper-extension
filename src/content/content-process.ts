@@ -19,7 +19,7 @@ export abstract class ContentProcess extends Scrapper
     public sendMessage($event,$data : any = {}) {
         $data.event = $event;
 
-        console.log($data);
+        console.log('Send message',$data);
 
         document.dispatchEvent(new CustomEvent('for-ext',{detail : $data }));
     }

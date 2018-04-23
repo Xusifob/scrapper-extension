@@ -7,10 +7,14 @@ class PopUp
     public google : any;
 
 
+    public facebook : any;
+
+
     constructor() {
 
         this.linkedin = $('#linkedin');
         this.google = $('#google');
+        this.facebook = $('#facebook');
 
         this.eventListener();
 
@@ -26,7 +30,7 @@ class PopUp
         });
 
         $('.download').on('click',function () {
-            chrome.tabs.create({ url: 'https://www.linkedin.com/?download=true' });
+            chrome.tabs.create({ url: 'https://www.linkedin.com/feed/?download=true' });
         });
 
         $('button').on('click',function () {
@@ -67,6 +71,9 @@ class PopUp
         }
         if(message.google) {
             this.google.attr('running','true').addClass('running');
+        }
+        if(message.facebook) {
+            this.facebook.attr('running','true').addClass('running');
         }
 
     }

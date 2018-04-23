@@ -77,6 +77,10 @@
       margin-bottom: 25px;
     }
 
+      a {
+          display:block;
+      }
+
   </style>
   <script src="js/vendor.js"></script>
 
@@ -88,8 +92,8 @@
     <span class="badge running">Running</span>
     <span class="badge stop">Stopped</span>
   </p>
-  <button>Lancer</button>
-</section>
+  <button class="launch">Launch</button>
+  <button class="stop">Stop scrapping</button></section>
 <section class="section" running="false" id="linkedin">
   <p>
     Scrapping Linkedin
@@ -97,9 +101,10 @@
     <span class="badge stop">Stopped</span>
   </p>
   <p>
-    <button>Lancer</button>
-  </p>
-  <a href="https://www.linkedin.com/?download=true" target="_blank">Télécharger les données LinkedIn</a>
+    <button class="launch">Launch</button>
+    <button class="stop">Stop scrapping</button>  </p>
+  <a href="https://www.linkedin.com/feed/?download=true" target="_blank">Download all LinkedIn data</a>
+  <a href="https://www.linkedin.com/feed/?reset=true" onclick="confirm('Are you sure to delete all scrapped data?');"  target="_blank">Delete all linkedin data</a>
 </section>
 
 <section class="section" running="false" id="google">

@@ -34,22 +34,22 @@ export class GoogleScrapper extends CGoogle
     public google : string = 'https://www.google.com';
 
 
+
+
     /**
      *
-     * @param {any[]} $data
+     * Add script to the page
+     *
      */
-    public constructor($data : any = []) {
+    public launch($data) : void
+    {
 
-
-        super();
-
-        console.log($data);
+        this.is_running = $data.running;
 
         if($data && $data.data) {
             for(let prop in $data.data){
                 if($data.data.hasOwnProperty(prop)){
                     this[prop] = $data.data[prop];
-                    console.log(prop);
                 }
             }
         }
@@ -70,11 +70,17 @@ export class GoogleScrapper extends CGoogle
          */
         this.useCompanies = this.companies && this.companies.length > 0;
 
-        console.log(this);
+        if(!this.is_running) {
+            return;
+        }
 
-        return this;
+
+        this.run();
+
 
     }
+
+
 
 
     /**
@@ -95,9 +101,7 @@ export class GoogleScrapper extends CGoogle
             return;
         }
 
-        if(!this.is_running) {
-            return;
-        }
+
 
         if(!this.option_id) {
             this.sendMessage('notification',{title : 'Please set data to scrap',body : 'Please login to your account to set the scrapping data'});
@@ -212,6 +216,14 @@ export class GoogleScrapper extends CGoogle
     public pushTheData(){
 
         let $this = this;
+
+        if(!$this.is_running) {
+            "use strict";
+            setTimeout(function(){
+                $this.pushTheData()
+            },2000);
+            return;
+        }
 
         $this.pushData(function(){
             "use strict";

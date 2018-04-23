@@ -145,5 +145,12 @@ export abstract class Scrapper
 
 
 
+    static trim($string) {
+
+        return $string.replace(/(\r\n\t|\n|\r\t)/g,'').trim();
+    }
+
+
+
 
 }
