@@ -223,6 +223,7 @@ export abstract class Process
                 console.log($url);
 
                 if($id == $_id && $url) {
+                    chrome.notifications.clear($id);
                     if(typeof $url === "string") {
                         chrome.tabs.create({ url: $url});
                     }

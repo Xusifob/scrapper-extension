@@ -12,7 +12,7 @@ export class CLinkedin extends ContentProcess
      *
      * @type {number}
      */
-    public pages = 25;
+    public pages = 100;
 
 
     /**
@@ -43,7 +43,7 @@ export class CLinkedin extends ContentProcess
 
         let $this = this;
 
-        this.max_page = Math.min(50,this.pages);
+        this.max_page = Math.min(100,this.pages);
 
         this.urls = JSON.parse(localStorage.getItem('xus-profiles_url'));
 
@@ -57,8 +57,14 @@ export class CLinkedin extends ContentProcess
             this.users = [];
         }
 
+
+        this.handleDownload();
+        this.handleReset();
+
+
         if(this.users.length > 99) {
-            $('body').append('<div style="position: fixed;bottom: 0;left:0;color:#fff;background-color: red;padding: 15px;border: none;z-index: 999;left: 0;right: 0;width: 100%;display: block;font-size: 14px;text-align: center;">You\'ve visited a lot of profiles, let it cool down to avoid being flagged</div>');
+            $this.addBanner("You've visited a lot of profiles, let it cool down to avoid being flagged");
+            $this.setIsRunning(false);
             return;
         }
 
@@ -74,8 +80,7 @@ export class CLinkedin extends ContentProcess
             $this.load();
         });
 
-        this.handleDownload();
-        this.handleReset();
+
 
     }
 
@@ -96,9 +101,10 @@ export class CLinkedin extends ContentProcess
     private handleReset() : void {
 
 
-        if(document.location.href.match(/download=true/)) {
+        if(document.location.href.match(/reset=true/)) {
             localStorage.removeItem('xus-users');
-            localStorage.removeItem('xus-profiles_url');
+          //localStorage.removeItem('xus-profiles_url');
+            document.write('Your data has been reseted');
         }
     }
 
@@ -122,19 +128,24 @@ export class CLinkedin extends ContentProcess
      */
     public finish() : void
     {
-        this.is_running = false;
 
         let csv = this.createCSV(this.users);
 
+
+        // Create the document and download it
         let pom = document.createElement('a');
         pom.setAttribute('href', 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv));
         pom.setAttribute('download', 'leads.csv');
         pom.click();
 
-        this.sendMessage('pop-up-linkedin-button-click',{running : this.is_running})
+        // Send to background that it's not running anymore
+        this.setIsRunning(false);
 
+        // Display it
         document.write('Your leads are being extracted');
-        //document.write(csv);
+
+        // Send notification
+        this.sendNotification('Linkedin scrapping done!','Your leads are being extracted');
     }
 
 
@@ -156,6 +167,11 @@ export class CLinkedin extends ContentProcess
             return;
         }
 
+        if(!this.isLinkedin()) {
+            return;
+        }
+
+
         if(document.location.href.match(/\/in\//)) {
             this.profile();
         }else if(document.location.href.match(/\/search\//)) {
@@ -171,7 +187,6 @@ export class CLinkedin extends ContentProcess
 
         let $this = this;
 
-        console.log('Launch search !');
 
         $(".results-list").find('li').each(function(){
 
@@ -194,6 +209,9 @@ export class CLinkedin extends ContentProcess
 
 
         localStorage.setItem('xus-profiles_url',JSON.stringify(this.urls));
+
+        $this.addBanner('The scrapper is running. '+ this.urls.length +' profiles pending.',true);
+
 
         if($_page > this.max_page || $('.next-text').length == 0 || this.urls.length > 99) {
             $this.next();
@@ -221,13 +239,14 @@ export class CLinkedin extends ContentProcess
         $('html, body').animate({scrollTop:99999},1);
 
         setTimeout(function () {
-            $user.name = Scrapper.trim($('.pv-top-card-section__name').text());
+            $user.fullName = Scrapper.trim($('.pv-top-card-section__name').text());
             $user.company = Scrapper.trim($('.pv-top-card-section__company').text());
             $user.university = Scrapper.trim($('.pv-top-card-section__school').text());
             $user.location = Scrapper.trim($('.pv-top-card-section__location').text());
-            $user.position = Scrapper.trim($('.experience-section').find('li:first-child').find('h3').text());
+            $user.position = Scrapper.trim($('body').find('.experience-section').find('li:first-child').find('h3').text());
             $user.languages = Scrapper.trim($('.languages').find('.pv-accomplishments-block__summary-list').text());;
             $user.profile = document.location.href;
+            $user.scrapping_date = new Date().toISOString();
 
             let $universities = '';
 
@@ -244,10 +263,15 @@ export class CLinkedin extends ContentProcess
                 $this.users.push($user);
                 localStorage.setItem('xus-users',JSON.stringify($this.users));
             }
+            setTimeout(function () {
+                $('body').find('#infos-scrapper').append('<style>pre{text-align: left; background: #fff;padding: 1rem; margin: 1rem -15px 0; border: solid #f7f7f9; border-width: .2rem 0 0;}</style><pre>'+ JSON.stringify($user,null,2) +'</pre>');
+                $this.next();
+            },3000);
 
-            $this.next();
+        },7000);
 
-        },8000);
+        $this.addBanner('The scrapper is running. '+ $this.users.length +' users scrapped. '+ $this.urls.length +'profiles left',true);
+
     }
 
 
@@ -258,9 +282,6 @@ export class CLinkedin extends ContentProcess
      */
     public next() : void
     {
-
-        console.log('Next');
-
 
         this.urls = JSON.parse(localStorage.getItem('xus-profiles_url'));
         if(!this.urls){

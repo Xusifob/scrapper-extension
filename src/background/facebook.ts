@@ -135,8 +135,6 @@ export class BFacebook extends Process
     public next($data) : void {
         this.iterator++;
 
-        console.log($data);
-
         this.data = this.data.concat($data.options);
 
         this.scrap();
@@ -153,9 +151,13 @@ export class BFacebook extends Process
 
         let $this = this;
 
+
         for(let $i = 0; $i < $this.data.length; $i++){
             if(this.checkFacebookContent($this.data[$i])){
-                $this.sendNotification('A match has been found!','Check the facebook posts, we found a post that may interest you',$this.data[$i]);
+
+                console.log($this.data[$i]);
+
+                $this.sendNotification('A match has been found!','Check the facebook posts, we found a post that may interest you',$this.data[$i].url);
                 $_found = true;
             }
         }
@@ -164,12 +166,14 @@ export class BFacebook extends Process
 
             console.log('FOUND',$_found);
 
-
             // this.followerService.save(this.options).subscribe(function(){
 
 //          });
 
         }
+
+        this.iterator = 0;
+        this.data = [];
 
     }
 
@@ -239,7 +243,7 @@ export class BFacebook extends Process
             this.options.keywords = [];
         }
 
-        var $keys = this.options.keywords.join('|');
+        let $keys = this.options.keywords.join('|');
 
         return new RegExp($keys,'gi');
 
@@ -257,7 +261,7 @@ export class BFacebook extends Process
     {
         this._is_running = true === $running;
 
-        this.setActiveTab();
+        this.setActiveTab(true);
 
         this.isRunning();
 
@@ -294,7 +298,7 @@ export class BFacebook extends Process
     public handleEvents($event : any) : void
     {
         switch ($event.type) {
-            case 'pop-up-google-button-click' :
+            case 'pop-up-facebook-button-click' :
                 this.onToggle($event);
                 break;
             case 'pop-up-open' :
@@ -354,8 +358,6 @@ export class BFacebook extends Process
         let $this = this;
 
         setTimeout(function () {
-
-            console.log('FACEBOOK IS RUNNING',$this._is_running);
             $this.sendMessageToContent('facebook-running',{
                 running : $this._is_running,
             });
@@ -383,9 +385,7 @@ export class BFacebook extends Process
      */
     public onToggle($event : any) : void
     {
-
         this.is_running = $event.options.running;
-
     }
 
 

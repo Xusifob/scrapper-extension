@@ -89,7 +89,7 @@ export class BGoogle extends Process
     {
         this._is_running = true === $running;
 
-        this.setActiveTab();
+        this.setActiveTab(true);
 
         this.isRunning();
 

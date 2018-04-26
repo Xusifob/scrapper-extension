@@ -1,10 +1,13 @@
-import {GoogleScrapper} from "./google.scrapper";
 import {ContentProcess} from "./content-process";
 
 
-
+/**
+ * Class made to handle all google Content process
+ *
+ */
 export abstract class CGoogle extends ContentProcess
 {
+
 
 
     constructor() {
@@ -13,7 +16,7 @@ export abstract class CGoogle extends ContentProcess
 
         let $this = this;
 
-        if(!this.isGoogle() && !this.isCaptcha()) {
+        if(!this.isGoogle()) {
             return;
         }
 
@@ -27,26 +30,36 @@ export abstract class CGoogle extends ContentProcess
     }
 
 
-
+    /**
+     *
+     * Return if the page is google
+     *
+     * @returns {boolean}
+     */
     public isGoogle() : boolean
     {
-        return document.location.href.match(/google/) != undefined && document.location.href.match(/scrapping=true/) != undefined;
+        return this.isCaptcha() || (document.location.href.match(/google/) != undefined && document.location.href.match(/scrapping=true/) != undefined);
     }
 
 
-    public isCaptcha(){
+    /**
+     *
+     * Return if the page is a captcha
+     *
+     * @returns {boolean}
+     */
+    public isCaptcha() : boolean{
         "use strict";
-        return document.location.href.match(/ipv4\.google/)
+        return document.location.href.match(/ipv4\.google/) != undefined;
 
     }
 
 
-
-
-
+    /**
+     * Called on page load
+     */
     protected load() : void
     {
-
         this.sendMessage('google-load');
     }
 
@@ -60,7 +73,7 @@ export abstract class CGoogle extends ContentProcess
      */
     public handleCaptcha() : void
     {
-        this.sendMessage('google-captcha');
+        this.sendNotification('A captcha has been triggered','please check that the captcha has been trigered');
     }
 
 }

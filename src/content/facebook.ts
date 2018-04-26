@@ -105,6 +105,12 @@ export class CFacebook extends ContentProcess
     }
 
 
+    /**
+     *
+     * Return if the page loaded is facebook
+     *
+     * @returns {boolean}
+     */
     public isFacebook() : boolean
     {
         "use strict";

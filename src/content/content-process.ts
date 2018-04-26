@@ -11,6 +11,7 @@ export abstract class ContentProcess extends Scrapper
     public is_running : boolean = false;
 
 
+
     /**
      *
      * @param $event
@@ -74,6 +75,11 @@ export abstract class ContentProcess extends Scrapper
     }
 
 
+    /**
+     * Launch the process
+     *
+     * @param $run
+     */
     public launch($run : any) {
 
         this.is_running = $run.running;
@@ -81,6 +87,39 @@ export abstract class ContentProcess extends Scrapper
         this.run()
 
     }
+
+
+    /**
+     *
+     * Set that the script is running and send the data to the background
+     *
+     *
+     * @param {boolean} $running
+     */
+    public setIsRunning($running : boolean) {
+        this.is_running = $running;
+
+        this.sendMessage('pop-up-linkedin-button-click',{running : this.is_running});
+    }
+
+
+
+    /**
+     *
+     * Send a notification using background
+     *
+     * @param {string} $title
+     * @param {string} $body
+     */
+    public sendNotification($title : string,$body : string = '') : void {
+        this.sendMessage('notification',{
+            'title' : $title,
+            'body' : $body
+        });
+    }
+
+
+
 
 
     abstract run() : void;

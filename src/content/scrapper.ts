@@ -58,6 +58,31 @@ export abstract class Scrapper
 
     /**
      *
+     * @param {string} $message
+     * @param {string} $color
+     */
+    public addBanner($message : string,$color : string|boolean = 'red')
+    {
+        if(typeof $ === 'undefined') {
+            return;
+        }
+
+        if(typeof $color == 'boolean' && true === $color) {
+            $color = '#39B54A';
+        }
+
+        if(!this.body) {
+            this.body = $('body');
+        }
+
+        this.body.append('<div id="infos-scrapper" style="position: fixed;bottom: 0;left:0;color:#fff;background-color: '+ $color +';padding: 15px;border: none;z-index: 999;right: 0;width: 100%;display: block;font-size: 14px;text-align: center;">'+ $message +'</div>');
+
+    }
+
+
+
+    /**
+     *
      * Escape a Regex
      *
      * @param {string} string
