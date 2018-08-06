@@ -75,7 +75,9 @@ export abstract class Scrapper
             this.body = $('body');
         }
 
-        this.body.append('<div id="infos-scrapper" style="position: fixed;bottom: 0;left:0;color:#fff;background-color: '+ $color +';padding: 15px;border: none;z-index: 999;right: 0;width: 100%;display: block;font-size: 14px;text-align: center;">'+ $message +'</div>');
+        this.body.find('.scrapper-banner').remove();
+
+        this.body.append('<div id="infos-scrapper" class="scrapper-banner" style="position: fixed;bottom: 0;left:0;color:#fff;background-color: '+ $color +';padding: 15px;border: none;z-index: 999;right: 0;width: 100%;display: block;font-size: 14px;text-align: center;">'+ $message +'</div>');
 
     }
 
@@ -116,7 +118,7 @@ export abstract class Scrapper
      * @param s2
      * @returns {number}
      */
-    public similarity(s1, s2) {
+    public similarity(s1, s2) : number {
         var longer = s1;
         var shorter = s2;
         if (s1.length < s2.length) {
@@ -141,7 +143,7 @@ export abstract class Scrapper
      * @param s2
      * @returns {any|*}
      */
-    public editDistance(s1, s2) {
+    public editDistance(s1, s2) : number {
         s1 = s1.toLowerCase();
         s2 = s2.toLowerCase();
 
@@ -169,12 +171,24 @@ export abstract class Scrapper
     }
 
 
-
-    static trim($string) {
+    /**
+     *
+     * @param {string} $string
+     * @returns {string}
+     */
+    static trim($string : string) : string {
 
         return $string.replace(/(\r\n\t|\n|\r\t)/g,'').trim();
     }
 
+
+    /**
+     *
+     * @returns {string}
+     */
+    static getTodayDate() : string {
+        return new Date().toISOString().slice(0,10);
+    }
 
 
 

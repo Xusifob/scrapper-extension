@@ -66,8 +66,6 @@ export class BFacebook extends Process
 
         this.options = message.options.follower;
 
-        console.log(this.options);
-
         this.launch();
     }
 
@@ -86,11 +84,13 @@ export class BFacebook extends Process
         }
 
         $this.data = [];
+        $this.iterator = 0;
+
+        console.log('launch');
 
         $this.scrap();
 
-
-        this.setActiveTab(false,function () {
+        this.setActiveTab(false,null,function () {
             $this.timeout =  setTimeout(function(){
                 "use strict";
                 $this.launch();
@@ -110,8 +110,6 @@ export class BFacebook extends Process
         let $this = this;
 
         let $url = $this.options.urls[$this.iterator];
-
-        console.log('scrap',$url);
 
         // Reset when you reach the end
         if(!$url){
@@ -141,8 +139,9 @@ export class BFacebook extends Process
     }
 
 
-
-
+    /**
+     *
+     */
     public parseFacebookData() {
 
         this.posts = [];
@@ -155,26 +154,17 @@ export class BFacebook extends Process
         for(let $i = 0; $i < $this.data.length; $i++){
             if(this.checkFacebookContent($this.data[$i])){
 
-                console.log($this.data[$i]);
-
                 $this.sendNotification('A match has been found!','Check the facebook posts, we found a post that may interest you',$this.data[$i].url);
                 $_found = true;
             }
         }
 
         if($_found){
-
-            console.log('FOUND',$_found);
-
             // this.followerService.save(this.options).subscribe(function(){
 
 //          });
 
         }
-
-        this.iterator = 0;
-        this.data = [];
-
     }
 
 
@@ -194,6 +184,19 @@ export class BFacebook extends Process
         return false;
 
     }
+
+
+    /**
+     *
+     * Send the keyword regex to the content
+     *
+     * @param $event
+     */
+    public sendKeywordRegex($event : any) : void
+    {
+        this.sendMessageToContent('get-keyword-regex',{regex : this.getKeywordRegex().toString()},$event.options.url)
+    }
+
 
 
     /**
@@ -237,7 +240,7 @@ export class BFacebook extends Process
      *
      * @returns {RegExp}
      */
-    public getKeywordRegex()
+    public getKeywordRegex() : RegExp
     {
         if(!this.options.keywords){
             this.options.keywords = [];
@@ -295,7 +298,7 @@ export class BFacebook extends Process
      *
      * @param $event
      */
-    public handleEvents($event : any) : void
+    public handleEvents($event : {options : any, type : string}) : void
     {
         switch ($event.type) {
             case 'pop-up-facebook-button-click' :
@@ -315,6 +318,12 @@ export class BFacebook extends Process
                 break;
             case 'facebook-next' :
                 this.next($event);
+                break;
+            case 'app-loading' :
+                this.onLoad($event);
+                break;
+            case 'get-keyword-regex' :
+                this.sendKeywordRegex($event);
                 break;
 
         }
@@ -341,10 +350,10 @@ export class BFacebook extends Process
      * Called on load. Send a mesage to the front-end
      *
      */
-    public onLoad(message) : void
+    public onLoad(event : any) : void
     {
 
-        this.isRunning();
+        this.isRunning(event);
 
     }
 
@@ -352,7 +361,7 @@ export class BFacebook extends Process
     /**
      * Launch to the front-end that it's running
      */
-    public isRunning() : void
+    public isRunning(event : {options : any} = {options : {}}) : void
     {
 
         let $this = this;

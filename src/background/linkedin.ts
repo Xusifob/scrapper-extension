@@ -1,5 +1,4 @@
 import {Process} from './Process';
-import QueryInfo = chrome.tabs.QueryInfo;
 
 
 /**
@@ -13,8 +12,6 @@ export class BLinkedin extends Process
     constructor() {
 
         super();
-
-
 
         this.is_running = false;
 
@@ -68,23 +65,29 @@ export class BLinkedin extends Process
      * Called on load. Send a mesage to the front-end
      *
      */
-    public onLoad(message) : void
+    public onLoad($event : any) : void
     {
 
-        this.isRunning();
+        this.isRunning($event);
 
 
     }
 
 
 
-    public isRunning() : void
+    /**
+     * Launch to the front-end that it's running
+     */
+    public isRunning(event : {options : any} = {options : {}}) : void
     {
+
         let $this = this;
 
         setTimeout(function () {
-            $this.sendMessageToContent('linkedin-running',{'running' : $this._is_running});
-        },100);
+            $this.sendMessageToContent('linkedin-running',{
+                running : $this._is_running,
+            },event.options.url);
+        },2000);
     }
 
 
@@ -112,37 +115,6 @@ export class BLinkedin extends Process
         this.is_running = $event.options.running;
 
     }
-
-
-
-
-    /**
-     *
-     * @param {boolean} $doNotOpen
-     * @param {function} callback
-     */
-    public setActiveTab($doNotOpen : boolean = false,callback = null)
-    {
-
-        let $this = this;
-
-        console.log('setting active tab',$this);
-
-        chrome.tabs.query({url : ['https://*.linkedin.com/search/*','https://*.linkedin.com/in/*']},function(tabArray){
-
-            if(tabArray[0]) {
-                $this._active_tab = tabArray[0].id;
-
-                console.log('linkedin',tabArray[0]);
-
-                if(typeof callback === 'function') {
-                    callback();
-                }
-            }
-        });
-    }
-
-
 
 
 

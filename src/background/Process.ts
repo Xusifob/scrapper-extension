@@ -87,23 +87,33 @@ export abstract class Process
      *
      * @param {string} $event
      * @param $data
+     * @param $url
      */
-    public sendMessageToContent($event : string, $data : any = {}) : void {
+    public sendMessageToContent($event : string, $data : any = {},$url : string = '') : void {
 
         let $this = this;
 
-        console.log('Send EVENT',$event,$data);
+        let callback = function (tab_id) {
 
-        this.setActiveTab(false,function() {
+            if(tab_id == undefined) {
+                return;
+            }
 
-           console.log('SENDING',$event,$data);
 
-            chrome.tabs.sendMessage($this._active_tab, {
+            chrome.tabs.sendMessage(tab_id, {
                 event: $event,
                 data: $data,
             }, function (response) {});
+        };
 
-        });
+        console.log('Send message to url',$url);
+
+        if($url) {
+            this.getTabFromUrl(false,$url,callback);
+        }else {
+            this.setActiveTab(true,null,callback);
+
+        }
     }
 
 
@@ -112,48 +122,130 @@ export abstract class Process
 
     /**
      *
+     * Set the active tab. If already exist, do nothing
+     *
+     *
      * @param {boolean} $doNotOpen
-     * @param {function} callback
+     * @param {string|function} $url
+     * @param {string|function} callback
      */
-    public setActiveTab($doNotOpen : boolean = false,callback = null)
+    public setActiveTab($doNotOpen : boolean = false,$url : string|any = null,callback : any = null)
     {
 
         let $this = this;
 
-        console.log('setting active tab');
+        /** backward compatibility **/
+        if(typeof $url === 'function') {
+            callback = $url;
+            $url = null;
+            console.error($url);
+        }
 
 
-        // Use a random timeout to avoid multiple opens
-        setTimeout(function () {
+        if($this._active_tab) {
+            chrome.tabs.get($this._active_tab,function (tab) {
+                if (!chrome.runtime.lastError) {
+                    console.log('Tab already exist',tab);
+
+                    if(typeof callback == 'function') {
+                        callback($this._active_tab);
+                    }
+                    return;
+                }else{
+                    $this.setNewActiveTab($doNotOpen,$url,callback);
+                }
+            });
+        }else {
+            $this.setNewActiveTab($doNotOpen,$url,callback);
+        }
+
+    }
+
+
+    /**
+     *
+     * Set a new active tab if the current is dead
+     *
+     * @param {boolean} $doNotOpen
+     * @param {string | any} $url
+     * @param callback
+     */
+    public setNewActiveTab($doNotOpen : boolean = false,$url : string|any = null,callback : any = null)
+    {
+
+        let $this = this;
 
         chrome.windows.getAll({populate:true},function(windows){
             windows.forEach(function(window){
                 window.tabs.forEach(function(tab){
-                    if(tab.url.match(/scrapping=true/)){
-                        $this._active_tab = tab.id;
-                        if(typeof callback === 'function') {
-                            callback();
+
+                    if($url) {
+                        console.log('Set active tab for url',$url);
+                        if(tab.url == $url) {
+                            $this._active_tab = tab.id;
+                            if(typeof callback === 'function') {
+                                callback(tab.id);
+                            }
+                        }
+                    }else{
+                        if(tab.url.match(/scrapping=true/)){
+                            $this._active_tab = tab.id;
+                            if(typeof callback === 'function') {
+                                callback(tab.id);
+                            }
                         }
                     }
                 });
             });
 
             if(!$this._active_tab && !$doNotOpen) {
-                $this.openTab('https://google.com/?scrapping=true',callback);
+               // $this.openTab('https://google.com/?scrapping=true',callback);
+            }else {
+                if(typeof callback == 'function') {
+                    callback(undefined);
+                }
             }
 
         });
-
-        },Math.random()*500);
     }
 
+
+
+    /**
+     *
+     * Get a tab from a URL
+     *
+     * @param $doNotOpen
+     * @param $url
+     * @param callback
+     */
+    public getTabFromUrl($doNotOpen : boolean = false,$url : string|any = null,callback : any = null)
+    {
+
+        let $this = this;
+
+
+        chrome.windows.getAll({populate:true},function(windows){
+            windows.forEach(function(window){
+                window.tabs.forEach(function(tab){
+
+                    if(tab.url == $url) {
+                        $this._active_tab = tab.id;
+                        if(typeof callback === 'function') {
+                            callback(tab.id);
+                        }
+                    }
+                });
+            });
+        });
+    }
 
 
 
     public reloadTab() {
         let $this = this;
 
-        this.setActiveTab(false,function () {
+        this.setActiveTab(false,null,function () {
             chrome.tabs.reload($this.active_tab);
         })
     }
@@ -171,7 +263,7 @@ export abstract class Process
         let $this = this;
 
         if(!this._active_tab){
-            this.setActiveTab(true,callback);
+            this.setActiveTab(true,null,callback);
         }
 
         setTimeout(function(){
@@ -180,7 +272,7 @@ export abstract class Process
                     "use strict";
                     $this._active_tab = tab.id;
                     if('function' === typeof callback){
-                        callback();
+                        callback(tab.id);
                     }
                 });
             }else{
@@ -194,6 +286,8 @@ export abstract class Process
             }
         },500);
     }
+
+
 
 
     /**
@@ -210,10 +304,12 @@ export abstract class Process
             type : "basic",
             title : $title,
             message : $message,
-            iconUrl : '/icon.png'
+            iconUrl : '/icon.png',
+            requireInteraction : true,
         };
 
 
+        console.log('notification');
         console.log($url);
 
 
@@ -235,7 +331,12 @@ export abstract class Process
     }
 
 
-
+    /**
+     *
+     * Send a notification from a front-end event
+     *
+     * @param $event
+     */
     public sendNotificationFromEvent($event : any) : void
     {
         this.sendNotification($event.options.title,$event.options.body);

@@ -21,6 +21,51 @@ export class CFacebook extends ContentProcess
             $this.load();
         });
 
+
+    }
+
+
+
+    public handleActiveKeywords() : void
+    {
+
+        if(document.location.href.match(/active_keywords=true/g) == undefined) {
+            return;
+        }
+
+        this.sendMessage('get-keyword-regex');
+
+
+    }
+
+
+    public handleEvents($event : any)
+    {
+        switch ($event.event) {
+            case 'facebook-running' :
+                this.launch($event.data);
+                break;
+            case 'get-keyword-regex' :
+                this.parsePostContent($event.data);
+                break;
+        }
+    }
+
+
+    /**
+     *
+     * @param $data
+     */
+    public parsePostContent($data) : void
+    {
+        let post : Element = document.querySelectorAll('.userContent')[0];
+
+        let $clean = $data.regex.substring(1,$data.regex.length -3);
+
+        let $regex : RegExp = new RegExp($clean,'gi');
+
+        post.innerHTML = post.innerHTML.replace($regex,'<span style="background-color: yellow; font-weight: bold;">$&</span>');
+
     }
 
 
@@ -40,6 +85,7 @@ export class CFacebook extends ContentProcess
 
     private load() : void
     {
+        this.handleActiveKeywords();
         this.sendMessage('facebook-load');
     }
 
@@ -57,7 +103,7 @@ export class CFacebook extends ContentProcess
 
 
         data.content = $element.find('._5pbx').text();
-        data.url = 'https://facebook.com' + $element.find('._5pcq').attr('href');
+        data.url = 'https://facebook.com' + $element.find('._5pcq').attr('href') + '?active_keywords=true';
         data.date = $element.find('._5pcq').text();
         data.user = $element.find('.fwb a').text();
         data.group = $('title').text();
@@ -65,12 +111,9 @@ export class CFacebook extends ContentProcess
 
         let $id = data.url.match(/permalink\/[0-9]+/);
 
-        console.log(data.url);
 
         if($id && $id[0]){
             data.id = parseInt($id[0].replace('permalink/',''));
-        }else {
-            console.log(data);
         }
 
         return data;
@@ -123,8 +166,6 @@ export class CFacebook extends ContentProcess
      * @param $data
      */
     public launch($data) : void {
-
-        console.log('launch',$data);
 
         this.is_running = $data.running;
 
@@ -198,9 +239,6 @@ export class CFacebook extends ContentProcess
                 $this.data.push($content);
             }
         });
-
-
-        console.log($this.data);
 
 
         this.sendMessage('facebook-next',$this.data);

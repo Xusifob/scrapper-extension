@@ -29,6 +29,16 @@ export abstract class CGoogle extends ContentProcess
 
     }
 
+    public handleEvents($event : any)
+    {
+        switch ($event.event) {
+            case 'google-running' :
+                this.launch($event.data);
+                break;
+        }
+    }
+
+
 
     /**
      *

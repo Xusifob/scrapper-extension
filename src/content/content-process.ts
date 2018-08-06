@@ -1,5 +1,9 @@
 import {Scrapper} from "./scrapper";
 
+
+/**
+ *
+ */
 export abstract class ContentProcess extends Scrapper
 {
 
@@ -19,8 +23,7 @@ export abstract class ContentProcess extends Scrapper
      */
     public sendMessage($event,$data : any = {}) {
         $data.event = $event;
-
-        console.log('Send message',$data);
+        $data.url = document.location.href;
 
         document.dispatchEvent(new CustomEvent('for-ext',{detail : $data }));
     }
@@ -62,6 +65,12 @@ export abstract class ContentProcess extends Scrapper
     }
 
 
+    /**
+     *
+     * @param {string} $string
+     * @param {boolean} $separator
+     * @returns {string}
+     */
     protected createCSVLine($string : string,$separator : boolean) : string
     {
         let result = $string.replace(/"/g, '""');
@@ -73,6 +82,36 @@ export abstract class ContentProcess extends Scrapper
 
         return result;
     }
+
+
+    /**
+     *
+     * Download a JSON file as a CSV
+     *
+     * @param $json
+     */
+    public downloadJsonAsCsv($json : any[]) : void
+    {
+        let csv = this.createCSV($json);
+        this.downloadAsCsv(csv);
+    }
+
+
+    /**
+     *
+     * Download a string as CSV
+     *
+     * @param {string} csv
+     */
+    protected downloadAsCsv(csv : string)
+    {
+        // Create the document and download it
+        let pom = document.createElement('a');
+        pom.setAttribute('href', 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv));
+        pom.setAttribute('download', 'leads.csv');
+        pom.click();
+    }
+
 
 
     /**
@@ -124,6 +163,11 @@ export abstract class ContentProcess extends Scrapper
 
     abstract run() : void;
 
+    /**
+     *
+     * @param $event
+     */
+    abstract handleEvents($event : any) : void
 
 
 }
