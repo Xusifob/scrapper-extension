@@ -9,7 +9,7 @@ export class CLinkedin extends ContentProcess
 {
 
     /**
-     *
+     * @deprecated
      * @type {number}
      */
     public pages = 1000;
@@ -24,12 +24,16 @@ export class CLinkedin extends ContentProcess
 
     /**
      *
+     * @deprecated
+     *
      * @type {any[]}
      */
     public users = [];
 
 
     /**
+     * @deprecated
+     *
      * @type number
      */
     protected max_page = 1000;
@@ -37,12 +41,15 @@ export class CLinkedin extends ContentProcess
 
     /**
      *
+     * @deprecated
+     *
      * @type {any[]}
      */
     protected number_scrapped : any = {};
 
 
     /**
+     * @deprecated
      *
      * @type {number}
      */
@@ -56,18 +63,27 @@ export class CLinkedin extends ContentProcess
 
         let $this = this;
 
+
+        // If we are not on linkedin, stop the process
+        if(!this.isLinkedin()) {
+            return;
+        }
+
+
         this.urls = JSON.parse(localStorage.getItem('xus-profiles_url-2'));
 
         if(!this.urls) {
             this.urls = [];
         }
 
+       /** @deprecated This variable is not used in the V2 */
         this.users = JSON.parse(localStorage.getItem('xus-users'));
 
         if(!this.users) {
             this.users = [];
         }
 
+        /** @deprecated This variable is not used in the V2 */
         this.number_scrapped = JSON.parse(localStorage.getItem('xus-number_scrapped'));
 
         if(!this.number_scrapped) {
@@ -88,7 +104,7 @@ export class CLinkedin extends ContentProcess
         this.handleDownload();
         this.handleReset();
 
-
+        /** @deprecated This variable is not used in the V2 */
         if(this.number_scrapped[Scrapper.getTodayDate()] > (this.per_day +1)) {
             $this.addBanner("You've visited a lot of profiles today, let it cool down to avoid being flagged");
             $this.setIsRunning(false);
@@ -96,11 +112,6 @@ export class CLinkedin extends ContentProcess
         }
 
 
-        if(!this.isLinkedin()) {
-            return;
-        }
-
-        console.log('Is linkedin passed');
 
         $(document).ready(function () {
             $this.load();
@@ -203,7 +214,7 @@ export class CLinkedin extends ContentProcess
 
 
         if(document.location.href.match(/\/in\//)) {
-            this.profile();
+            // this.profile();
         }else if(document.location.href.match(/\/search\//)) {
             this.search();
         }
@@ -271,6 +282,8 @@ export class CLinkedin extends ContentProcess
 
     /**
      *
+     * @deprecated This function is not used in the V2
+     *
      * Scrap a profile page
      *
      */
@@ -324,6 +337,8 @@ export class CLinkedin extends ContentProcess
 
 
     /**
+     *
+     * @deprecated This function is not used in the V2
      *
      * Go to next profile
      *

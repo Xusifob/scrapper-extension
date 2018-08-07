@@ -158,12 +158,16 @@ export abstract class ContentProcess extends Scrapper
     }
 
 
-
-
-
+    /**
+     * Runs a process
+     */
     abstract run() : void;
 
     /**
+     *
+     * This function contains all the event handles by the process.
+     *
+     * For example, the event 'linkedin-load' will be caught in the handleEvent function of the Linkedin page
      *
      * @param $event
      */
